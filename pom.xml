@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.Ivo</groupId>
-    <artifactId>mlt3-attachments</artifactId>
+    <artifactId>mlt3-attachmentexport</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mlt3-attachments</name>
     <description>mlt3-attachments</description>
