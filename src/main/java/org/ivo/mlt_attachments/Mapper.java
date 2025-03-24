@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-
+@Component
 public class Mapper {
 
     public List<Attachment> deserializeJson() throws IOException {

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: Import_MLT_attachments
+  ssl:
+    bundle:
+      pem:
+        mlt-truststore:
+          truststore:
+            certificate: "classpath:truststore.crt"
