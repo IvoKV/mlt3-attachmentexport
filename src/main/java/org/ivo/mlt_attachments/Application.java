@@ -3,14 +3,11 @@ package org.ivo.mlt_attachments;
 import org.ivo.mlt_attachments.POJO.Attachment;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchProperties;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @SpringBootApplication
 public class Application {
