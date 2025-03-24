@@ -17,14 +17,14 @@ public class Application {
     static final String userHeader = """
             "{"root":"1.2.752.129.2.1.4.1","extension":"SE2321000016-cwz7","permissions":["archive-care-journal-admin-read"]}"
             """;
+    static final String baseUrl = "https://prod.mlt3.sll.se/api/archive/care/journal/admin/scan/filter/attachment/";
 
     public static void main(String[] args) throws IOException {
         SpringApplication.run(Application.class, args);
 
-        System.out.println("Hello World!");
         Mapper mapper = new Mapper();
         List<Attachment> attachments = mapper.deserializeJson();
-        RestClient restClient = RestClient.builder()                .baseUrl("https://prod.mlt3.sll.se/api/archive/care/journal/admin/scan/filter/attachment/").build();
+        RestClient restClient = RestClient.builder()                .baseUrl(baseUrl).build();
 
         attachments.forEach(attachment -> {
             RestClient.ResponseSpec retrieve = restClient.get()
@@ -40,9 +40,6 @@ public class Application {
             String body = retrieve.body(String.class);
             System.out.println(body);
 
-
         });
-        System.out.println();
     }
-
 }
