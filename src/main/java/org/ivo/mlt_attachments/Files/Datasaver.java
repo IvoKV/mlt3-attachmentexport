@@ -1,5 +1,6 @@
 package org.ivo.mlt_attachments.Files;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +29,11 @@ public class Datasaver {
 
     public void saveAttachments(byte [] data, Path workingDir, String mimetype, int filecounter) throws IOException {
         Path filepath = workingDir.resolve("image" + "_" + filecounter + "." + mimetype);
-        Files.write(filepath, data);
+        //Files.write(filepath, data);
+        try (FileOutputStream fos = new FileOutputStream(filepath.toFile())) {
+            fos.write(data);
+        }catch (Exception e) {
+            System.out.println("Error saving file " + filepath + " to " + mimetype);
+        }
     }
 }
