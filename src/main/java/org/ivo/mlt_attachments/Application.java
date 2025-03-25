@@ -63,6 +63,7 @@ public class Application {
                         Path pathJpeg = datasaver.createAttachmentDirectory("tiff");
                         int counter = filecounterTiff.incrementAndGet();
                         datasaver.saveAttachments(filebytes, pathJpeg, "tiff", counter);
+                        System.out.println("counter tiff = " + counter);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -73,12 +74,19 @@ public class Application {
                         Path pathJpeg = datasaver.createAttachmentDirectory("jpeg");
                         int counter = filecounterJpeg.incrementAndGet();
                         datasaver.saveAttachments(filebytes, pathJpeg, "jpeg", counter);
+                        System.out.println("counter jpeg = " + counter);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
         });
+        StringBuilder sb = new StringBuilder();
+        sb.append("Alla bilagor överförda, jobbet är avslutat.\n");
+        sb.append("Antal tiff-ar: " + filecounterTiff.get() + "\n");
+        sb.append("Antal jpeg-ar: " + filecounterJpeg.get() + "\n");
+        sb.append("Summa total filer: " + filecounterTiff.get() + filecounterJpeg.get() + "\n");
+        System.out.println(sb.toString());
     }
 
     @Bean
