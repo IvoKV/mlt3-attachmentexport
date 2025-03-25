@@ -58,7 +58,7 @@ public class Application {
             Datasaver datasaver = new Datasaver();
             switch (attachment.mediaType()) {
                 case "image/tiff" -> {
-                    byte[] filebytes = body.getBytes();
+                    byte[] filebytes = body.getBytes(StandardCharsets.ISO_8859_1);
                     try {
                         Path pathJpeg = datasaver.createAttachmentDirectory("tiff");
                         int counter = filecounterTiff.incrementAndGet();
@@ -68,7 +68,7 @@ public class Application {
                     }
                 }
                 case "image/jpeg" -> {
-                    byte[] filebytes = body.getBytes(StandardCharsets.UTF_8);
+                    byte[] filebytes = body.getBytes(StandardCharsets.ISO_8859_1);
                     try {
                         Path pathJpeg = datasaver.createAttachmentDirectory("jpeg");
                         int counter = filecounterJpeg.incrementAndGet();
