@@ -85,7 +85,8 @@ public class Application {
         sb.append("Alla bilagor överförda, jobbet är avslutat.\n");
         sb.append("Antal tiff-ar: " + filecounterTiff.get() + "\n");
         sb.append("Antal jpeg-ar: " + filecounterJpeg.get() + "\n");
-        sb.append("Summa total filer: " + filecounterTiff.get() + filecounterJpeg.get() + "\n");
+        int sum = filecounterJpeg.get() + filecounterTiff.get();
+        sb.append("Summa total filer: " + sum + "\n");
         System.out.println(sb.toString());
     }
 
