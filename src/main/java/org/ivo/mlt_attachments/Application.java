@@ -1,7 +1,10 @@
 package org.ivo.mlt_attachments;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
 import org.ivo.mlt_attachments.Files.Datasaver;
 import org.ivo.mlt_attachments.POJO.Attachment;
+import org.ivo.mlt_attachments.fileconverter.ImageToPdf;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +18,7 @@ import org.springframework.web.client.RestClient;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootApplication
@@ -43,6 +46,7 @@ public class Application {
         System.out.println("test1");
         final AtomicInteger filecounterJpeg = new AtomicInteger();
         final AtomicInteger filecounterTiff = new AtomicInteger();
+        Set<String> linkedWorkDirs = new LinkedHashSet<>();
 
         attachments.forEach(attachment -> {
             RestClient.ResponseSpec retrieve = client.get()
@@ -62,6 +66,7 @@ public class Application {
                     try {
                         Path pathJpeg = datasaver.createAttachmentDirectory("tiff");
                         int counter = filecounterTiff.incrementAndGet();
+                        linkedWorkDirs.add(pathJpeg.toAbsolutePath().toString());
                         datasaver.saveAttachments(filebytes, pathJpeg, "tiff", counter);
                         System.out.println("counter tiff = " + counter);
                     } catch (IOException e) {
@@ -73,6 +78,7 @@ public class Application {
                     try {
                         Path pathJpeg = datasaver.createAttachmentDirectory("jpeg");
                         int counter = filecounterJpeg.incrementAndGet();
+                        linkedWorkDirs.add(pathJpeg.toAbsolutePath().toString());
                         datasaver.saveAttachments(filebytes, pathJpeg, "jpeg", counter);
                         System.out.println("counter jpeg = " + counter);
                     } catch (IOException e) {
@@ -81,6 +87,26 @@ public class Application {
                 }
             }
         });
+
+        ImageToPdf imageToPdf = new ImageToPdf();
+        Path destinationDirectory = imageToPdf.createOutputDirectory(linkedWorkDirs);
+        String filename = "pdfExport";
+        AtomicInteger filecounterPdf = new AtomicInteger();
+        linkedWorkDirs.forEach(workDir -> {
+            int pdfcounter = filecounterPdf.incrementAndGet();
+            try {
+                List<Path> filenames = imageToPdf.importImageList(workDir);
+                Document document = imageToPdf.initializeDocument();
+                document.open();
+                imageToPdf.imagesToPdf(filenames, destinationDirectory, pdfcounter, document);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (DocumentException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
         StringBuilder sb = new StringBuilder();
         sb.append("Alla bilagor överförda, jobbet är avslutat.\n");
         sb.append("Antal tiff-ar: " + filecounterTiff.get() + "\n");
