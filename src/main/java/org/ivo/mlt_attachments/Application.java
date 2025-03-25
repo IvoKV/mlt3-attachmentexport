@@ -1,5 +1,6 @@
 package org.ivo.mlt_attachments;
 
+import org.ivo.mlt_attachments.Files.Datasaver;
 import org.ivo.mlt_attachments.POJO.Attachment;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @SpringBootApplication
@@ -64,28 +65,39 @@ public class Application {
             RestClient.ResponseSpec retrieve = client.get()
                     .uri(builder -> builder.pathSegment(attachment.index(), attachment.id())
                             .build())
-//                    .header("Content-Type", "application/json")
+                    .header("Content-Type", "application/json")
                     .header("X-MLT-User", userHeader)
                     .retrieve();
             String body = retrieve.onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
-                System.out.println(response.getStatusCode());
+                System.out.println("response = " + response.getStatusCode());
 
             }).body(String.class);
+            Datasaver datasaver = new Datasaver();
             switch (attachment.mediaType()) {
                 case "image/tiff" -> {
                     System.out.println("tiff");
+                    //byte[] filebytes = body.getBytes(StandardCharsets.UTF_8);
+//                    datasaver.setFiletype("tiff");
+//                    try {
+//                        datasaver.saveData(filebytes);
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
+
                 }
                 case "image/jpeg" -> {
                     System.out.println("jpeg");
+                    byte[] filebytes = body.getBytes(StandardCharsets.UTF_8);
+                    int length = filebytes.length;
+                    //datasaver.setFiletype("jpeg");
+                    try {
+                        datasaver.saveData(filebytes, "jpeg");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
             }
-            //System.out.println(body);
-//                    .onStatus(HttpStatusCode::isError, (request, response) -> {
-//                        throw new RuntimeException("Misslyckades med bilaga %s".formatted(attachment));
-//                  });
-    //        String body = retrieve.body(String.class);
-    //        System.out.println(body);
         });
     }
 
