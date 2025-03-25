@@ -14,7 +14,9 @@ import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootApplication
 @RestController
@@ -31,37 +33,18 @@ public class Application {
         this.mapper = mapper;
     }
 
-
     public static void main(String[] args) throws IOException {
         SpringApplication.run(Application.class, args);
-//
-//        Mapper mapper = new Mapper();
-//        List<Attachment> attachments = mapper.deserializeJson();
-//        RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
-//
-//        attachments.forEach(attachment -> {
-//            RestClient.ResponseSpec retrieve = restClient.get()
-//                    .uri(builder -> builder.pathSegment(attachment.index(), attachment.id())
-//                            .build())
-//                    .header("Content-Type", "application/json")
-////                    .header("X-MLT-User", userHeader)
-//                    .retrieve()
-//                    .onStatus(HttpStatusCode::isError,(request, response) -> {
-//                        throw new RuntimeException("Misslyckades med bilaga %s".formatted(attachment));
-//                    });
-//
-//            String body = retrieve.body(String.class);
-//            System.out.println(body);
-//
-//        });
     }
 
     @GetMapping("/attachments-get")
     public void useRestClient() throws IOException {
         List<Attachment> attachments = mapper.deserializeJson();
         System.out.println("test1");
+        final AtomicInteger filecounterJpeg = new AtomicInteger();
+        final AtomicInteger filecounterTiff = new AtomicInteger();
+
         attachments.forEach(attachment -> {
-            System.out.println("test2");
             RestClient.ResponseSpec retrieve = client.get()
                     .uri(builder -> builder.pathSegment(attachment.index(), attachment.id())
                             .build())
@@ -75,28 +58,25 @@ public class Application {
             Datasaver datasaver = new Datasaver();
             switch (attachment.mediaType()) {
                 case "image/tiff" -> {
-                    System.out.println("tiff");
-                    //byte[] filebytes = body.getBytes(StandardCharsets.UTF_8);
-//                    datasaver.setFiletype("tiff");
-//                    try {
-//                        datasaver.saveData(filebytes);
-//                    } catch (IOException e) {
-//                        throw new RuntimeException(e);
-//                    }
-
-                }
-                case "image/jpeg" -> {
-                    System.out.println("jpeg");
                     byte[] filebytes = body.getBytes(StandardCharsets.UTF_8);
-                    int length = filebytes.length;
-                    //datasaver.setFiletype("jpeg");
                     try {
-                        datasaver.saveData(filebytes, "jpeg");
+                        Path pathJpeg = datasaver.createAttachmentDirectory("tiff");
+                        int counter = filecounterTiff.incrementAndGet();
+                        datasaver.saveAttachments(filebytes, pathJpeg, "tiff", counter);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
-
+                case "image/jpeg" -> {
+                    byte[] filebytes = body.getBytes(StandardCharsets.UTF_8);
+                    try {
+                        Path pathJpeg = datasaver.createAttachmentDirectory("jpeg");
+                        int counter = filecounterJpeg.incrementAndGet();
+                        datasaver.saveAttachments(filebytes, pathJpeg, "jpeg", counter);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         });
     }
@@ -109,5 +89,4 @@ public class Application {
                 .apply(ssl.fromBundle("mlt-truststore"))
                 .build();
     }
-
 }
