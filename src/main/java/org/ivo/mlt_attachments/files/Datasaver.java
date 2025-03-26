@@ -1,4 +1,4 @@
-package org.ivo.mlt_attachments.Files;
+package org.ivo.mlt_attachments.files;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,8 +8,6 @@ import java.nio.file.Paths;
 
 public class Datasaver {
     final static private String attachmentDir = "attachments";
-    private byte[] data;
-    private final static String outputpath = "src/output/";
 
     public Path createAttachmentDirectory(String type) throws IOException {
         String workdir = System.getProperty("user.dir");

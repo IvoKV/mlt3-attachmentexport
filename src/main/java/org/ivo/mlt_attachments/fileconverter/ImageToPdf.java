@@ -16,16 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ImageToPdf {
-    private Set<String> workDir = new LinkedHashSet<>();
     private List<Path> paths = new ArrayList<>();
-    private List<Byte> images;
-    private String mimetype;
 
     public ImageToPdf() {
-    }
-
-    public ImageToPdf(Set<String> workDir) throws IOException {
-        this.workDir = workDir;
     }
 
     public List<String> importImageList(String wokrDir) throws IOException {
@@ -41,12 +34,14 @@ public class ImageToPdf {
     }
 
     private Document initializeDocument(){
-        Document document = new Document(PageSize.A3, 20.0f, 20.0f, 20.0f, 150.0f);
+        Document document = new Document(PageSize.A1, 20.0f, 20.0f, 20.0f, 150.0f);
         return document;
     }
 
-    public int imagesToPdf(List<String> files, Path destinationPath, int filecounter) throws IOException, DocumentException {
-        int falseBooleans = 0;
+    public StringBuilder imagesToPdf(List<String> files, Path destinationPath, int filecounter) throws IOException, DocumentException {
+        int falseBooleansTiff = 0;
+        int falseBooleansJpeg = 0;
+        StringBuilder sb = new StringBuilder();
 
         String pdfName = "pdfExport_";
         Path filenamePdf = Paths.get(destinationPath.toString(),pdfName + filecounter + ".pdf");
@@ -72,7 +67,7 @@ public class ImageToPdf {
                     }
                     pdf.close();
                     if (! (IOHelper.fileExists(filenamePdf.toString()) &&  filesAdded == files.size())) {
-                        falseBooleans++;
+                        falseBooleansTiff++;
                     }
                 }
                 else if(selection.equals("jpeg")){
@@ -90,12 +85,19 @@ public class ImageToPdf {
                 }
             }
             if (! (IOHelper.fileExists(filenamePdf.toString()) &&  filesAdded == files.size())) {
-                falseBooleans++;
+                falseBooleansJpeg++;
             }
         }
         catch(FileNotFoundException | DocumentException e1){
            throw new RuntimeException(e1);
         }
-        return falseBooleans;
+        if(falseBooleansTiff > 0 ){
+            sb.append("Error counts in Tiff conversion: " + falseBooleansTiff + "\n");
+        }
+        if(falseBooleansJpeg > 0 ){
+            sb.append("Error counts in JPEG conversion: " + falseBooleansJpeg + "\n");
+        }
+        sb.trimToSize();
+        return sb;
     }
 }

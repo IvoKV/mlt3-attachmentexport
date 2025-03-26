@@ -1,7 +1,7 @@
 package org.ivo.mlt_attachments;
 
 import com.itextpdf.text.DocumentException;
-import org.ivo.mlt_attachments.Files.Datasaver;
+import org.ivo.mlt_attachments.files.Datasaver;
 import org.ivo.mlt_attachments.POJO.Attachment;
 import org.ivo.mlt_attachments.fileconverter.ImageToPdf;
 import org.ivo.mlt_attachments.filehelper.IOHelper;
@@ -96,12 +96,12 @@ public class Application {
             try {
                 List<String> filenames = imageToPdf.importImageList(workDir);
 
-                int converted = imageToPdf.imagesToPdf(filenames, destinationDirectory, pdfcounter);
-                if (converted == 0) {
-                    System.out.println("pdf successfully converted!");
+                StringBuilder sbLog = imageToPdf.imagesToPdf(filenames, destinationDirectory, pdfcounter);
+                if(sbLog.length() > 0) {
+                    System.out.println(sbLog);
                 }
                 else {
-                    System.out.println("pdf was NOT converted!");
+                    System.out.println("Conversion done successfully");
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
