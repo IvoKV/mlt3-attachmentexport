@@ -1,10 +1,10 @@
 package org.ivo.mlt_attachments;
 
-import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import org.ivo.mlt_attachments.Files.Datasaver;
 import org.ivo.mlt_attachments.POJO.Attachment;
 import org.ivo.mlt_attachments.fileconverter.ImageToPdf;
+import org.ivo.mlt_attachments.filehelper.IOHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -89,16 +89,20 @@ public class Application {
         });
 
         ImageToPdf imageToPdf = new ImageToPdf();
-        Path destinationDirectory = imageToPdf.createOutputDirectory(linkedWorkDirs);
-        String filename = "pdfExport";
+        Path destinationDirectory = IOHelper.createOutputDirectory(linkedWorkDirs);
         AtomicInteger filecounterPdf = new AtomicInteger();
         linkedWorkDirs.forEach(workDir -> {
             int pdfcounter = filecounterPdf.incrementAndGet();
             try {
-                List<Path> filenames = imageToPdf.importImageList(workDir);
-                Document document = imageToPdf.initializeDocument();
-                document.open();
-                imageToPdf.imagesToPdf(filenames, destinationDirectory, pdfcounter, document);
+                List<String> filenames = imageToPdf.importImageList(workDir);
+
+                int converted = imageToPdf.imagesToPdf(filenames, destinationDirectory, pdfcounter);
+                if (converted == 0) {
+                    System.out.println("pdf successfully converted!");
+                }
+                else {
+                    System.out.println("pdf was NOT converted!");
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (DocumentException e) {
