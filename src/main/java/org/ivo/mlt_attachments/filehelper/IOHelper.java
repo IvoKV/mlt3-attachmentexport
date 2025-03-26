@@ -26,4 +26,9 @@ public class IOHelper {
     public static boolean fileExists(String filename) {
         return Files.exists(Paths.get(filename));
     }
+
+    public static String getMimeType(String imgFilename) {
+        String selection = imgFilename.substring(imgFilename.lastIndexOf('\\') + 1);
+        return selection;
+    }
 }

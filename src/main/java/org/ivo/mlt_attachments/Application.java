@@ -1,6 +1,8 @@
 package org.ivo.mlt_attachments;
 
+import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.PageSize;
 import org.ivo.mlt_attachments.files.Datasaver;
 import org.ivo.mlt_attachments.POJO.Attachment;
 import org.ivo.mlt_attachments.fileconverter.ImageToPdf;
@@ -95,8 +97,19 @@ public class Application {
             int pdfcounter = filecounterPdf.incrementAndGet();
             try {
                 List<String> filenames = imageToPdf.importImageList(workDir);
+                StringBuilder sbLog = new StringBuilder();
+                if(IOHelper.getMimeType(workDir).equals("tiff")) {
+                   //Document pdf = imageToPdf.initializeDocument();
+                    //pdf.open();
+                    sbLog = imageToPdf.tiffImagesToPdf(filenames, destinationDirectory, pdfcounter);
+                    //if(pdf != null) pdf.close();
+                }
+                else if(IOHelper.getMimeType(workDir).equals("jpeg")) {
+                    //Document pdf = imageToPdf.initializeDocument(PageSize.A1);
+                    //pdf.open();
+                    sbLog = imageToPdf.jpegImagesToPdf(filenames, destinationDirectory, pdfcounter);
+                }
 
-                StringBuilder sbLog = imageToPdf.imagesToPdf(filenames, destinationDirectory, pdfcounter);
                 if(sbLog.length() > 0) {
                     System.out.println(sbLog);
                 }

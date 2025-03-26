@@ -4,6 +4,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.io.FileChannelRandomAccessSource;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.codec.JBIG2Image;
 import com.itextpdf.text.pdf.codec.TiffImage;
 import org.ivo.mlt_attachments.filehelper.IOHelper;
 
@@ -22,80 +23,116 @@ public class ImageToPdf {
     }
 
     public List<String> importImageList(String wokrDir) throws IOException {
-         paths = Files.walk(Paths.get(wokrDir))
+        paths = Files.walk(Paths.get(wokrDir))
                 .filter(Files::isRegularFile)
                 .collect(Collectors.toList());
 
-         List<String> filenames = paths
-                 .stream()
-                 .map(p -> p.toString())
-                 .collect(Collectors.toList());
-         return filenames;
+        List<String> filenames = paths
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList());
+        return filenames;
     }
 
-    private Document initializeDocument(){
-        Document document = new Document(PageSize.A1, 20.0f, 20.0f, 20.0f, 150.0f);
-        return document;
+    private Document initializeDocument() {
+        return new Document(PageSize.A4, 20.0f, 20.0f, 20.0f, 150.0f);
     }
 
-    public StringBuilder imagesToPdf(List<String> files, Path destinationPath, int filecounter) throws IOException, DocumentException {
+    private Document initializeDocument(Rectangle pageSize) throws IOException {
+        return new Document(pageSize, 20.0f, 20.0f, 20.0f, 150.0f);
+    }
+
+    public StringBuilder tiffImagesToPdf(List<String> files, Path destinationPath, int filecounter) throws IOException, DocumentException {
         int falseBooleansTiff = 0;
-        int falseBooleansJpeg = 0;
         StringBuilder sb = new StringBuilder();
 
-        String pdfName = "pdfExport_";
-        Path filenamePdf = Paths.get(destinationPath.toString(),pdfName + filecounter + ".pdf");
+        String pdfName = "pdfExport_tiff";
+        Path filenamePdf = Paths.get(destinationPath.toString(), pdfName + filecounter + ".pdf");
         try {
             Document pdf = initializeDocument();
             PdfWriter.getInstance(pdf, new FileOutputStream(filenamePdf.toString()));
+            pdf.open();
+            PdfWriter.getInstance(pdf, new FileOutputStream(filenamePdf.toString()));
             int filesAdded = 0;
+            for (String imgFilename : files) {
+                try {
+                    FileChannelRandomAccessSource source = new FileChannelRandomAccessSource(new FileInputStream(imgFilename).getChannel());
+                    RandomAccessFileOrArray file = new RandomAccessFileOrArray(source);
+                    int pages = TiffImage.getNumberOfPages(file);
+                    for (int page = 1; page <= pages; page++) {
+                        Image img = TiffImage.getTiffImage(file, page);
+                        Rectangle pageSize = pdf.getPageSize();
+                        img.scaleAbsoluteHeight(pageSize.getHeight());
+                        img.scaleAbsoluteWidth(pageSize.getWidth());
+                        if (pdf.add(img)) filesAdded++;
+                    }
+                    if (files.getLast() == imgFilename) {
+                        if (pdf.isOpen()) pdf.close();
+                    } else {
+                        pdf.newPage();
+                    }
 
-            for(String imgFilename : files) {
-                String selection = imgFilename.substring(imgFilename.indexOf(".") + 1);
-                if (selection.equals("tiff")) {
-                    try {
-                        pdf.open();
-                        FileChannelRandomAccessSource source = new FileChannelRandomAccessSource(new FileInputStream(imgFilename).getChannel());
-                        RandomAccessFileOrArray file = new RandomAccessFileOrArray(source);
-                        int pages = TiffImage.getNumberOfPages(file);
-                        for (int page = 1; page <= pages; page++) {
-                            Image img = TiffImage.getTiffImage(file, page);
-                            if (pdf.add(img)) filesAdded++;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    pdf.close();
-                    if (! (IOHelper.fileExists(filenamePdf.toString()) &&  filesAdded == files.size())) {
-                        falseBooleansTiff++;
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                else if(selection.equals("jpeg")){
-                    try {
-                        FileOutputStream fos = new FileOutputStream(filenamePdf.toString());
-                        PdfWriter writer = PdfWriter.getInstance(pdf, fos);
-                        writer.open();
-                        pdf.open();
-                        if (pdf.add(Image.getInstance(imgFilename))) filesAdded++;
-                        pdf.close();
-                        writer.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+
+                if (!(IOHelper.fileExists(filenamePdf.toString()) && filesAdded == files.size())) {
+                    falseBooleansTiff++;
                 }
             }
-            if (! (IOHelper.fileExists(filenamePdf.toString()) &&  filesAdded == files.size())) {
-                falseBooleansJpeg++;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (falseBooleansTiff > 0) {
+            sb.append("Errors found in tiff-conversion: " + falseBooleansTiff + "\n");
+        }
+        sb.trimToSize();
+        return sb;
+    }
+
+    public StringBuilder jpegImagesToPdf(List<String> files, Path destinationPath, int filecounter) throws IOException, DocumentException {
+        int falseBooleansJpeg = 0;
+        StringBuilder sb = new StringBuilder();
+        String pdfName = "pdfExport_jpeg";
+
+        Path filenamePdf = Paths.get(destinationPath.toString(), pdfName + filecounter + ".pdf");
+        try {
+            Document pdf = initializeDocument(PageSize.A1);
+            pdf.open();
+            PdfWriter.getInstance(pdf, new FileOutputStream(filenamePdf.toString()));
+            int filesAdded = 0;
+            //Document pdf = initializeDocument(PageSize.A1);
+            if (!pdf.isOpen()) pdf.open();
+            for (String imgFilename : files) {
+                PdfWriter.getInstance(pdf, new FileOutputStream(filenamePdf.toString()));
+                FileOutputStream fos = new FileOutputStream(filenamePdf.toString());
+                PdfWriter writer = PdfWriter.getInstance(pdf, fos);
+                writer.open();
+                //pdf.open();
+
+                FileChannelRandomAccessSource source = new FileChannelRandomAccessSource(new FileInputStream(imgFilename).getChannel());
+                RandomAccessFileOrArray file1 = new RandomAccessFileOrArray(source);
+                //int pages = JBIG2Image.getNumberOfPages(file1);
+                //for(int page = 1; page <= pages; pages++) {
+                //Image img = JBIG2Image.getJbig2Image(file1, 1);
+                Rectangle pageSize = pdf.getPageSize();
+                //img.scaleAbsoluteHeight(pageSize.getHeight());
+                //img.scaleAbsoluteWidth(pageSize.getWidth());
+                if (pdf.add(Image.getInstance(imgFilename))) filesAdded++;
+                //pdf.close();
+                writer.close();
+                if (files.getLast() == imgFilename) {
+                    if (pdf.isOpen()) pdf.close();
+                } else {
+                    pdf.newPage();
+                }
             }
+        } catch (DocumentException e) {
+            e.printStackTrace();
         }
-        catch(FileNotFoundException | DocumentException e1){
-           throw new RuntimeException(e1);
-        }
-        if(falseBooleansTiff > 0 ){
-            sb.append("Error counts in Tiff conversion: " + falseBooleansTiff + "\n");
-        }
-        if(falseBooleansJpeg > 0 ){
-            sb.append("Error counts in JPEG conversion: " + falseBooleansJpeg + "\n");
+        if (falseBooleansJpeg > 0) {
+            sb.append("Errors found in tiff-conversion: " + falseBooleansJpeg + "\n");
         }
         sb.trimToSize();
         return sb;
