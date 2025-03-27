@@ -15,7 +15,6 @@ public class IOHelper {
 
         Path parentDirectory = destinationPath.getParent();
         Path destinationDirectory = Paths.get(parentDirectory.toString(), "pdfExport");
-        System.out.println("destinationDirectory = " + destinationDirectory.toString());
 
         if (!Files.isDirectory(destinationDirectory)) {
             Files.createDirectories(destinationDirectory);

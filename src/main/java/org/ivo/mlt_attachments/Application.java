@@ -91,20 +91,16 @@ public class Application {
         ImageToPdf imageToPdf = new ImageToPdf();
         Path destinationDirectory = IOHelper.createOutputDirectory(linkedWorkDirs);
         AtomicInteger filecounterPdf = new AtomicInteger();
+        System.out.println("CONVERSION OF IMAGE FILES STARTS NOW .......");
         linkedWorkDirs.forEach(workDir -> {
             int pdfcounter = filecounterPdf.incrementAndGet();
             try {
                 List<String> filenames = imageToPdf.importImageList(workDir);
                 StringBuilder sbLog = new StringBuilder();
                 if(IOHelper.getMimeType(workDir).equals("tiff")) {
-                   //Document pdf = imageToPdf.initializeDocument();
-                    //pdf.open();
                     sbLog = imageToPdf.tiffImagesToPdf(filenames, destinationDirectory, pdfcounter);
-                    //if(pdf != null) pdf.close();
                 }
                 else if(IOHelper.getMimeType(workDir).equals("jpeg")) {
-                    //Document pdf = imageToPdf.initializeDocument(PageSize.A1);
-                    //pdf.open();
                     sbLog = imageToPdf.jpegImagesToPdf(filenames, destinationDirectory, pdfcounter);
                 }
 
@@ -120,7 +116,6 @@ public class Application {
                 throw new RuntimeException(e);
             }
         });
-
 
         StringBuilder sb = new StringBuilder();
         sb.append("Alla bilagor överförda, jobbet är avslutat.\n");
