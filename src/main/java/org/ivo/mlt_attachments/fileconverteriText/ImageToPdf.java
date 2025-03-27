@@ -1,18 +1,19 @@
-package org.ivo.mlt_attachments.fileconverter;
+package org.ivo.mlt_attachments.fileconverteriText;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.io.FileChannelRandomAccessSource;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
-import com.itextpdf.text.pdf.codec.JBIG2Image;
 import com.itextpdf.text.pdf.codec.TiffImage;
 import org.ivo.mlt_attachments.filehelper.IOHelper;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -1,11 +1,9 @@
 package org.ivo.mlt_attachments;
 
-import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.PageSize;
 import org.ivo.mlt_attachments.files.Datasaver;
 import org.ivo.mlt_attachments.POJO.Attachment;
-import org.ivo.mlt_attachments.fileconverter.ImageToPdf;
+import org.ivo.mlt_attachments.fileconverteriText.ImageToPdf;
 import org.ivo.mlt_attachments.filehelper.IOHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
