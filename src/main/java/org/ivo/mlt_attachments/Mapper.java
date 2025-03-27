@@ -15,7 +15,7 @@ public class Mapper {
 
     public List<Attachment> deserializeJson() throws IOException {
 
-        String json = Files.readString(Path.of("src/main/resources/attachmentmetadata_copy1.json"));
+        String json = Files.readString(Path.of("src/main/resources/attachmentmetadata.json"));
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<Attachment> attachment = objectMapper.readValue(json, new TypeReference<>() {});

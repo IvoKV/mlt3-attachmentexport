@@ -34,3 +34,8 @@ build/
 
 ### Ivo local ###
 /attachments
+src/main/resources/attachmentmetadata*.json
+src/main/resources/truststore.crt
+
+
+
